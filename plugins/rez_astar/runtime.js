@@ -25,9 +25,229 @@ cr.plugins_.RezAstar = function(runtime)
 
 	var typeProto = pluginProto.Type.prototype;
 	
-	/*
+	/**
+	* JavaScript BitArray - v0.1.1
+	* 
+	* Licensed under the revised BSD License.
+	* Copyright 2010 Bram Stein
+	* All rights reserved.
+	*/
+	
+	/**
+	* Creates a new empty BitArray, or initialises the BitArray with the given BitArray serialisation (an Array of integers.)
+	*/
+	var BitArray = function (values) {
+		this.values = values || [];
+	};
+
+	/**
+	* Returns the total number of bits in this BitArray.
+	*/
+	BitArray.prototype.size = function () {
+		return this.values.length * 32;
+	};
+
+	/**
+	* Sets the bit at index to a value (boolean.)
+	*/
+	BitArray.prototype.set = function (index, value) {
+		var i = Math.floor(index / 32);
+		// Since "undefined | 1 << index" is equivalent to "0 | 1 << index" we do not need to initialise the array explicitly here.
+		if (value) {
+			this.values[i] |= 1 << index - i * 32;
+		} else {
+			this.values[i] &= ~(1 << index - i * 32);
+		}
+		return this;
+	};
+
+	/**
+	* Toggles the bit at index. If the bit is on, it is turned off. Likewise, if the bit is off it is turned on.
+	*/
+	BitArray.prototype.toggle = function (index) {
+		var i = Math.floor(index / 32);
+		this.values[i] ^= 1 << index - i * 32;
+		return this;
+	};
+
+	/**
+	* Returns the value of the bit at index (boolean.)
+	*/
+	BitArray.prototype.get = function (index) {
+		var i = Math.floor(index / 32);
+		return !!(this.values[i] & (1 << index - i * 32));
+	};
+
+	/**
+	* Resets the BitArray so that it is empty and can be re-used.
+	*/
+	BitArray.prototype.reset = function () {
+		this.values = [];
+		return this;
+	};
+
+	/**
+	* Returns a copy of this BitArray.
+	*/
+	BitArray.prototype.copy = function () {
+		var cp = new BitArray();
+		cp.length = this.length;
+		cp.values = [].concat(this.values);
+		return cp;
+	};
+
+	/**
+	* Returns true if this BitArray equals another. Two BitArrays are considered
+	* equal if both have the same length and bit pattern.
+	*/
+	BitArray.prototype.equals = function (x) {
+		return this.values.length === x.values.length &&
+			this.values.every(function (value, index) {
+			return value === x.values[index];
+		});
+	};
+
+	/**
+	* Returns the JSON representation of this BitArray.
+	*/
+	BitArray.prototype.toJSON = function () {
+		return JSON.stringify(this.values);
+	};
+
+	/**
+	* Returns a string representation of the BitArray with bits
+	* in logical order.
+	*/
+	BitArray.prototype.toString = function () {
+		return this.toArray().map(function (value) {
+			return value ? '1' : '0';
+		}).join('');
+	};
+
+	/**
+	* Returns the internal representation of the BitArray.
+	*/
+	BitArray.prototype.valueOf = function () {
+		return this.values;
+	};
+
+	/**
+	* Convert the BitArray to an Array of boolean values.
+	*/
+	BitArray.prototype.toArray = function () {
+		var result = [];
+		this.forEach(function (value, index) {
+			result.push(value);
+		});
+		return result;
+	};
+
+	/**
+	* Convert the BitArray to an Array of integers specifying which bits are set.
+	*/
+	BitArray.prototype.toIntArray = function () {
+		var result = [];
+		this.forEach(function (value, index) {
+			if (value) {
+				result.push(index);
+			}
+		});
+		return result;
+	};
+
+	/**
+	* Returns the total number of bits set to one in this BitArray.
+	*/
+	BitArray.prototype.count = function () {
+		var total = 0;
+
+		// If we remove the toggle method we could efficiently cache the number of bits without calculating it on the fly.
+		this.values.forEach(function (x) {
+			// See: http://bits.stephan-brumme.com/countBits.html for an explanation
+			x  = x - ((x >> 1) & 0x55555555);
+			x  = (x & 0x33333333) + ((x >> 2) & 0x33333333);
+			x  = x + (x >> 4);
+			x &= 0xF0F0F0F;
+
+			total += (x * 0x01010101) >> 24;
+		});
+		return total;
+	};
+
+	/**
+	* Iterate over each value in the BitArray.
+	*/
+	BitArray.prototype.forEach = function (fn, scope) {
+		var i = 0, b = 0, index = 0,
+			len = this.values.length,
+			value, word;
+
+		for (; i < len; i += 1) {
+			word = this.values[i];
+			for (b = 0; b < 32; b += 1) {
+				value = (word & 1) !== 0;
+				fn.call(scope, value, index, this);
+				word = word >> 1;
+				index += 1;
+			}
+		}
+		return this;
+	};
+
+	/**
+	* Inverts this BitArray.
+	*/
+	BitArray.prototype.not = function () {
+		this.values = this.values.map(function (v) {
+			return ~v;
+		});
+		return this;
+	};
+
+	/**
+	* Bitwise OR on the values of this BitArray using BitArray x.
+	*/
+	BitArray.prototype.or = function (x) {
+		if (this.values.length !== x.values.length) {
+			throw 'Arguments must be of the same length.';
+		}
+		this.values = this.values.map(function (v, i) {
+			return v | x.values[i];
+		});
+		return this;
+	};
+
+	/**
+	* Bitwise AND on the values of this BitArray using BitArray x.
+	*/
+	BitArray.prototype.and = function (x) {
+		if (this.values.length !== x.values.length) {
+			throw 'Arguments must be of the same length.';
+		}
+		this.values = this.values.map(function (v, i) {
+			return v & x.values[i];
+		});
+		return this;
+	};
+
+	/**
+	* Bitwise XOR on the values of this BitArray using BitArray x.
+	*/
+	BitArray.prototype.xor = function (x) {
+		if (this.values.length !== x.values.length) {
+			throw 'Arguments must be of the same length.';
+		}
+		this.values = this.values.map(function (v, i) {
+			return v ^ x.values[i];
+		});
+		return this;
+	};
+	
+	/**
 	Copyright (C) 2009 by Benjamin Hardin
 	http://46dogs.blogspot.com/2009/10/star-pathroute-finding-javascript-code.html
+	
+	Copyright (C) 2012 by Andrew Hall
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -46,16 +266,7 @@ cr.plugins_.RezAstar = function(runtime)
 	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 	THE SOFTWARE.
-	
-	Original source: http://niseg.moshela.com/for_46dog/a_star_46dog_opt.js
-	Not sure who the author is!
-	
-	*/
 
-	/**
-		@class AStar path finding algorithm implementation by Benjamin Hardin.
-		@description Finds a path between two different squares on a two dimensional board of squares with some squares marked as impassable. Original MIT licensed source code from http://46dogs.blogspot.com/2009/10/star-pathroute-finding-javascript-code.html
-		@param initial_board is a two dimensional array of 1/0 values for passable/non-passable squares.
 	*/
 	
 	function a_star(start, destination, board, columns, rows)
@@ -66,24 +277,18 @@ cr.plugins_.RezAstar = function(runtime)
 
 		var open = []; //List of open nodes (nodes to be inspected)
 		var closed = []; //List of closed nodes (nodes we've already inspected)
-		var obv =new Array((rows*columns)>>5+1); // bit vector that tells weather a node is in open list
-		var cbv =new Array((rows*columns)>>5+1); // bit vector that tells weather a node is in closed list
+		var obv = new BitArray();
+		var cbv = new BitArray();
 		var g = 0; //Cost from start to current node
 		var h = heuristic(start, destination); //Cost from current node to destination
 		var f = g+h; //Cost from start to destination going through the current node
 
-		// initialize bit vectors to 0 - empty queues
-		for(var i=0;i<obv.length;++i)
-		{
-			cbv[i]=0;
-			obv[i]=0;
-		}
 		//Push the start node onto the list of open nodes
 		//open.push(start); 
 		// insert in order so index 0 is always the best
 		insertInOrder(open,start);
 		// set it's bit
-		setArrayBit(obv,start.y*columns +start.x,1); 
+		obv.set(start.y * columns + start.x, true); 
 		//Keep going while there's nodes in our open list
 		while (open.length > 0)
 		{
@@ -115,12 +320,12 @@ cr.plugins_.RezAstar = function(runtime)
 			//Remove the current node from our open list
 			open.splice(best_node, 1);
 			//clear its bit
-			setArrayBit(obv,current_node.y*columns +current_node.x,0); 
+			obv.set(current_node.y * columns + current_node.x, false); 
 
 			//Push it onto the closed list
 			closed.push(current_node);
 			// set it's bit O(1)
-			setArrayBit(cbv,current_node.y*columns +current_node.x,1); 
+			cbv.set(current_node.y * columns + current_node.x, true); 
 			//Expand our current node (look in all 8 directions)
 			for (var new_node_x = Math.max(0, current_node.x-1); new_node_x <= Math.min(columns-1, current_node.x+1); new_node_x++)
 				for (var new_node_y = Math.max(0, current_node.y-1); new_node_y <= Math.min(rows-1, current_node.y+1); new_node_y++)
@@ -132,7 +337,7 @@ cr.plugins_.RezAstar = function(runtime)
 						var found_in_closed = false;
 				
 					// optimization replaces the O(N) loop with O(1) bit check
-					if(0 != getArrayBit(cbv,new_node_y*columns + new_node_x) )
+					if(0 != cbv.get(new_node_y * columns + new_node_x))
 						found_in_closed= true;
 					/*
 						for (var i in closed)
@@ -148,7 +353,7 @@ cr.plugins_.RezAstar = function(runtime)
 						//See if the node is in our open list. If not, use it.
 						var found_in_open = false;
 						// same optimization as for the closed list
-						if(0 != getArrayBit(obv,new_node_y*columns + new_node_x) )
+						if(0 != obv.get(new_node_y * columns + new_node_x))
 							found_in_open= true;
 					/*
 						for (var i in open)
@@ -164,12 +369,12 @@ cr.plugins_.RezAstar = function(runtime)
 
 							new_node.g = current_node.g + Math.floor(Math.sqrt(Math.pow(new_node.x-current_node.x, 2)+Math.pow(new_node.y-current_node.y, 2)));
 							new_node.h = heuristic(new_node, destination);
-							new_node.f = new_node.g+new_node.h;
+							new_node.f = new_node.g + new_node.h;
 							// insert in order so index 0 is always the best
 							insertInOrder(open,new_node);
 								//open.push(new_node);
 							// set the bit after pushing element
-							setArrayBit(obv,new_node_y*columns + new_node_x,1); 
+							obv.set(new_node_y * columns + new_node_x, true); 
 						}
 					}
 				}
@@ -186,7 +391,7 @@ cr.plugins_.RezAstar = function(runtime)
 		//return Math.floor(Math.sqrt(Math.pow(current_node.x-destination.x, 2)+Math.pow(current_node.y-destination.y, 2)));
 		var x = current_node.x - destination.x;
 		var y = current_node.y - destination.y;
-		return x*x+y*y;
+		return Math.sqrt(x*x+y*y);
 	}
 
 
@@ -209,49 +414,31 @@ cr.plugins_.RezAstar = function(runtime)
 		this.f = f;
 	}
 
-
-	function setArrayBit(ar,bit,val)
+	function insertInOrder(ar, node)
 	{
-		var mask;
-		mask=1<<(31-(bit&0x1f));
-		if(val==0)
-			ar[bit>>5]&=~mask;
-		else
-			ar[bit>>5]|=mask;
-	}
-
-	function getArrayBit(ar,bit)
-	{
-		var mask;
-		mask=1<<(31-(bit&0x1f));
-		if((ar[bit>>5]&mask)==0)
-			return 0;
-		else return 1;
-	}
-
-
-	function insertInOrder(ar,node)
-	{
-		var track=0;
+		var track = 0;
 		var aro;
-		var i=0;
-		var max=ar.length-1;
-		var min=0;
-		while((max-min)>1)
+		var i = 0;
+		var max = ar.length - 1;
+		var min = 0;
+		while ((max-min) > 1)
 		{
 			track++;
-			i=(max+min)>>1;
-			if(ar[i].f>node.f)
-			max=i-1;
-			else min=i+1;
+			i = (max+min) >> 1;
+			if (ar[i].f > node.f)
+			max = i - 1;
+			else min = i + 1;
 		}
-		//i=Math.max(i-1,0);
+
 		i=max;
-		while(ar[i]!=undefined && ar[i].f==node.f)
-		{track++;i++;}
-		if(ar[i]!=undefined && ar[i].f<node.f)
+		while (ar[i] != undefined && ar[i].f == node.f)
+		{
+			track++;
 			i++;
-		ar.splice(Math.max(i,0),0,node);
+		}
+		if (ar[i] != undefined && ar[i].f < node.f)
+			i++;
+		ar.splice(Math.max(i,0), 0, node);
 		return track;
 	}
 
