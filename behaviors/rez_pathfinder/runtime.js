@@ -147,7 +147,7 @@ cr.behaviors.RezPathfinder = function(runtime)
 		
 		if (this.path.length != [] && this.astar.map[this.path[pos].x][this.path[pos].y] == 0)
 		{
-			ret.set_int(Math.round(this.path[pos].x * ts);
+			ret.set_int(Math.round(this.path[pos].x * ts));
 		}
 		else
 		{
@@ -165,7 +165,7 @@ cr.behaviors.RezPathfinder = function(runtime)
 		
 		if (this.path.length != [] && this.astar.map[this.path[pos].x][this.path[pos].y] == 0)
 		{
-			ret.set_int(Math.round(this.path[pos].y * ts);
+			ret.set_int(Math.round(this.path[pos].y * ts));
 		}
 		else
 		{
