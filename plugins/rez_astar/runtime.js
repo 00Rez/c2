@@ -475,11 +475,84 @@ cr.plugins_.RezAstar = function(runtime)
 		this.runtime = type.runtime;
 	};
 	
+	instanceProto.useObjects = function(obj, solid)
+	{
+		var sol, length, i, sx, sy, dx, dy, tx, ty;
+		
+		sol = obj.instances;
+		length = sol.length;
+		
+		for (i = 0; i < length; i++)
+		{
+			sx = sol[i].x - (sol[i].width / 2);
+			sy = sol[i].y - (sol[i].height / 2);
+			
+			sx = cr.clamp(Math.round(sx / this.ts), 0, this.gw - 1);
+			sy = cr.clamp(Math.round(sy / this.ts), 0, this.gh - 1);
+			
+			dx = sol[i].x + (sol[i].width / 2);
+			dy = sol[i].y + (sol[i].height / 2);
+			
+			dx = cr.clamp(Math.round(dx / this.ts), 0, this.gw - 1);
+			dy = cr.clamp(Math.round(dy / this.ts), 0, this.gh - 1);
+			
+			for (tx = sx; tx <= dx; tx++)
+			{
+				for (ty = sy; ty <= dy; ty++)
+				{
+					sol[i].update_bbox();
+					sol[i].set_bbox_changed();
+					if (sol[i].bbox.contains_pt(tx * this.ts, ty * this.ts))
+					{
+						// == This will add all the bbox.
+						this.map[tx][ty] = solid; // Solidify.
+						this.cost[tx][ty] = 0; // Reset cost to zero.
+						this.changes.push([tx, ty]);
+						
+						/* == This will only add the outline of the bbox.
+						if (tx == sx || tx == dx)
+						{
+							this.map[tx][ty] = solid;
+							this.cost[tx][ty] = 0; // Reset cost to zero.
+							this.changes.push([tx, ty]);
+						};
+						
+						if (ty == sy || ty == dy)
+						{
+							this.map[tx][ty] = solid;
+							this.map[tx][ty] = 0; // Reset cost to zero.
+							this.changes.push([tx, ty]);
+						};
+						*/
+					};
+				};
+			};
+		};
+	};
+	
 	var instanceProto = pluginProto.Instance.prototype;
 	
 	instanceProto.findPath = function(start, destination)
 	{
 		return a_star(start, destination, this.map, this.gw, this.gh, this.cost)
+	};
+	
+	instanceProto.clearMap = function ()
+	{
+		var change;
+	
+		// uses a list of changed cells for speed
+		if (this.changes != [])
+		{
+			for (change in this.changes) // need to change this!
+			{
+				this.map[change[0]][change[1]] = 0;
+			};
+		};
+		
+		this.changes = [];
+		
+		return true;
 	};
 
 	// called whenever an instance is created
@@ -510,24 +583,6 @@ cr.plugins_.RezAstar = function(runtime)
 	instanceProto.drawGL = function (glw)
 	{
 	};
-
-	instanceProto.clearMap = function ()
-	{
-		var change;
-	
-		// uses a list of changed cells for speed
-		if (this.changes != [])
-		{
-			for (change in this.changes) // need to change this!
-			{
-				this.map[change[0]][change[1]] = 0;
-			};
-		};
-		
-		this.changes = [];
-		
-		return true;
-	};
 	
 	//////////////////////////////////////
 	// Conditions
@@ -541,96 +596,12 @@ cr.plugins_.RezAstar = function(runtime)
 	
 	acts.BlockPathUsingObject = function (obj)
 	{
-		var sol, length, i, sx, sy, dx, dy, tx, ty;
-		
-		sol = obj.instances;
-		length = sol.length;
-		
-		for (i = 0; i < length; i++)
-		{
-			sx = sol[i].x - (sol[i].width / 2);
-			sy = sol[i].y - (sol[i].height / 2);
-			
-			sx = cr.clamp(Math.round(sx / this.ts), 0, this.gw - 1);
-			sy = cr.clamp(Math.round(sy / this.ts), 0, this.gh - 1);
-			
-			dx = sol[i].x + (sol[i].width / 2);
-			dy = sol[i].y + (sol[i].height / 2);
-			
-			dx = cr.clamp(Math.round(dx / this.ts), 0, this.gw - 1);
-			dy = cr.clamp(Math.round(dy / this.ts), 0, this.gh - 1);
-			
-			for (tx = sx; tx <= dx; tx++)
-			{
-				for (ty = sy; ty <= dy; ty++)
-				{
-					sol[i].update_bbox();
-					sol[i].set_bbox_changed();
-					if (sol[i].bbox.contains_pt(tx * this.ts, ty * this.ts))
-					{
-						// If uncommented will only add outer edges of bbox:
-						//if (tx == sx || tx == dx)
-						//{
-							this.map[tx][ty] = 1;
-							this.cost[tx][ty] = 0; // Cost feature to be added!
-							this.changes.push([tx, ty]);
-						//};
-						
-						//if (ty == sy || ty == dy)
-						//{
-							//this.map[tx][ty] = 1;
-							//this.changes.push([tx, ty]);
-						//};
-					};
-				};
-			};
-		};
+		this.useObjects(obj, 1);
 	};
 	
 	acts.UnblockPathUsingObject = function (obj)
 	{
-		var sol, length, i, sx, sy, dx, dy, tx, ty;
-		
-		sol = obj.instances;
-		length = sol.length;
-		
-		for (i = 0; i < length; i++)
-		{
-			sx = sol[i].x - (sol[i].width / 2);
-			sy = sol[i].y - (sol[i].height / 2);
-			
-			sx = cr.clamp(Math.round(sx / this.ts), 0, this.gw - 1);
-			sy = cr.clamp(Math.round(sy / this.ts), 0, this.gh - 1);
-			
-			dx = sol[i].x + (sol[i].width / 2);
-			dy = sol[i].y + (sol[i].height / 2);
-			
-			dx = cr.clamp(Math.round(dx / this.ts), 0, this.gw - 1);
-			dy = cr.clamp(Math.round(dy / this.ts), 0, this.gh - 1);
-			
-			for (tx = sx; tx <= dx; tx++)
-			{
-				for (ty = sy; ty <= dy; ty++)
-				{
-					sol[i].update_bbox();
-					sol[i].set_bbox_changed();
-					if (sol[i].bbox.contains_pt(tx * this.ts, ty * this.ts))
-					{
-						//if (tx == sx || tx == dx)
-						//{
-							this.map[tx][ty] = 0;
-							this.changes.push([tx, ty]);
-						//};
-						
-						//if (ty == sy || ty == dy)
-						//{
-							//this.map[tx][ty] = 1;
-							//this.changes.push([tx, ty]);
-						//};
-					};
-				};
-			};
-		};
+		this.useObjects(obj, 0);
 	};
 	
 	acts.ClearGrid = function ()
