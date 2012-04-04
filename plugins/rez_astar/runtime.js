@@ -594,14 +594,19 @@ cr.plugins_.RezAstar = function(runtime)
 	pluginProto.acts = {};
 	var acts = pluginProto.acts;
 	
-	acts.BlockPathUsingObject = function (obj, cost)
+	acts.BlockPathUsingObject = function (obj)
 	{
-		this.useObjects(obj, 1, cost);
+		this.useObjects(obj, 1, 0);
 	};
 	
 	acts.UnblockPathUsingObject = function (obj)
 	{
 		this.useObjects(obj, 0);
+	};
+	
+	acts.SetCostUsingObject = function (obj, cost)
+	{
+		this.useObjects(obj, 0, cost);
 	};
 	
 	acts.ClearGrid = function ()

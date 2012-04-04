@@ -16,7 +16,6 @@
 ////////////////////////////////////////
 // Actions
 AddObjectParam("Object", "Object to use for blocking.");
-AddNumberParam("Cost", "This will affect pathfinding.", "0");
 AddAction(0, af_none, "Block path using object", "Pathfinding", "Use {0} to block paths", "Block path using an object.", "BlockPathUsingObject");
 
 AddAction(1, af_none, "Clear map of all blockers", "Pathfinding", "Clear map of all blockers", "Clear the map of all blockers.", "ClearMap");
@@ -24,6 +23,9 @@ AddAction(1, af_none, "Clear map of all blockers", "Pathfinding", "Clear map of 
 AddObjectParam("Object", "Object to use for unblocking.");
 AddAction(2, af_none, "Unblock path using object", "Pathfinding", "Use {0} to unblock paths", "Unblock path using an object.", "UnblockPathUsingObject");
 
+AddObjectParam("Object", "Object to use for cost.");
+AddNumberParam("Cost", "This will affect pathfinding.", "0");
+AddAction(3, af_none, "Set cost using object", "Pathfinding", "Use {0} to set cost to {1}", "Set cost using an object.", "SetCostUsingObject");
 
 ////////////////////////////////////////
 // Expressions
