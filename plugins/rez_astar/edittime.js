@@ -16,6 +16,7 @@
 ////////////////////////////////////////
 // Actions
 AddObjectParam("Object", "Object to use for blocking.");
+AddNumberParam("Cost", "This will affect pathfinding.", "0");
 AddAction(0, af_none, "Block path using object", "Pathfinding", "Use {0} to block paths", "Block path using an object.", "BlockPathUsingObject");
 
 AddAction(1, af_none, "Clear map of all blockers", "Pathfinding", "Clear map of all blockers", "Clear the map of all blockers.", "ClearMap");

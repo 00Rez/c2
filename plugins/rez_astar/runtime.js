@@ -475,7 +475,9 @@ cr.plugins_.RezAstar = function(runtime)
 		this.runtime = type.runtime;
 	};
 	
-	instanceProto.useObjects = function(obj, solid)
+	var instanceProto = pluginProto.Instance.prototype;
+	
+	instanceProto.useObjects = function(obj, solid, cost)
 	{
 		var sol, length, i, sx, sy, dx, dy, tx, ty;
 		
@@ -506,14 +508,14 @@ cr.plugins_.RezAstar = function(runtime)
 					{
 						// == This will add all the bbox.
 						this.map[tx][ty] = solid; // Solidify.
-						this.cost[tx][ty] = 0; // Reset cost to zero.
+						this.cost[tx][ty] = cost; // Reset cost to zero.
 						this.changes.push([tx, ty]);
 						
 						/* == This will only add the outline of the bbox.
 						if (tx == sx || tx == dx)
 						{
 							this.map[tx][ty] = solid;
-							this.cost[tx][ty] = 0; // Reset cost to zero.
+							this.cost[tx][ty] = cost; // Reset cost to zero.
 							this.changes.push([tx, ty]);
 						};
 						
@@ -529,8 +531,6 @@ cr.plugins_.RezAstar = function(runtime)
 			};
 		};
 	};
-	
-	var instanceProto = pluginProto.Instance.prototype;
 	
 	instanceProto.findPath = function(start, destination)
 	{
@@ -594,9 +594,9 @@ cr.plugins_.RezAstar = function(runtime)
 	pluginProto.acts = {};
 	var acts = pluginProto.acts;
 	
-	acts.BlockPathUsingObject = function (obj)
+	acts.BlockPathUsingObject = function (obj, cost)
 	{
-		this.useObjects(obj, 1);
+		this.useObjects(obj, 1, cost);
 	};
 	
 	acts.UnblockPathUsingObject = function (obj)
