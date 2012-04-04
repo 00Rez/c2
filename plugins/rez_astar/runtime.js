@@ -269,7 +269,7 @@ cr.plugins_.RezAstar = function(runtime)
 
 	*/
 	
-	function a_star(start, destination, board, columns, rows)
+	function a_star(start, destination, board, columns, rows, extracost)
 	{
 		//Create start and destination as true nodes
 		start = new node(start[0], start[1], -1, -1, -1, -1);
@@ -369,7 +369,7 @@ cr.plugins_.RezAstar = function(runtime)
 
 							new_node.g = current_node.g + Math.floor(Math.sqrt(Math.pow(new_node.x-current_node.x, 2)+Math.pow(new_node.y-current_node.y, 2)));
 							new_node.h = heuristic(new_node, destination);
-							new_node.f = new_node.g + new_node.h;
+							new_node.f = new_node.g + new_node.h + extracost[new_node_x][new_node_y];
 							// insert in order so index 0 is always the best
 							insertInOrder(open,new_node);
 								//open.push(new_node);
@@ -479,7 +479,7 @@ cr.plugins_.RezAstar = function(runtime)
 	
 	instanceProto.findPath = function(start, destination)
 	{
-		return a_star(start, destination, this.map, this.gw, this.gh)
+		return a_star(start, destination, this.map, this.gw, this.gh, this.cost)
 	};
 
 	// called whenever an instance is created
@@ -496,6 +496,7 @@ cr.plugins_.RezAstar = function(runtime)
 		this.gh = this.properties[2]; 
 		
 		this.map = createMap(this.gw, this.gh);
+		this.cost = createMap(this.gw, this.gh);
 	};
 	
 	// only called if a layout object - draw to a canvas 2D context
@@ -571,6 +572,7 @@ cr.plugins_.RezAstar = function(runtime)
 						//if (tx == sx || tx == dx)
 						//{
 							this.map[tx][ty] = 1;
+							this.cost[tx][ty] = 0; // Cost feature to be added!
 							this.changes.push([tx, ty]);
 						//};
 						
