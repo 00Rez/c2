@@ -4,9 +4,9 @@
 		"name":			"Astar",				// as appears in 'insert object' dialog, can be changed as long as "id" stays the same
 		"id":			"RezAstar",				// this is used to identify this plugin and is saved to the project; never change it
 		"version":		"0.1",					// (float in x.y format) Plugin version - C2 shows compatibility warnings based on this
-		"description":	"This plugin is used with the behaviour Pathfinder to allow fast pathfinding.",
-		"author":		"Andrew Hall / 00Rez",
-		"help url":		"<your website or a manual entry on Scirra.com>",
+		"description":	"This plugin is connected with the behaviour Pathfinder to allow fast pathfinding.",
+		"author":		"00Rez / Andrew Hall",
+		"help url":		"https://github.com/00Rez/c2",
 		"category":		"General",				// Prefer to re-use existing categories, but you can set anything here
 		"type":			"object",				// either "world" (appears in layout and is drawn), else "object"
 		"flags":		0						// uncomment lines to enable flags...
@@ -25,7 +25,10 @@ AddAction(2, af_none, "Unblock path using object", "Pathfinding", "Use {0} to un
 
 AddObjectParam("Object", "Object to use for cost.");
 AddNumberParam("Cost", "This will affect pathfinding.", "0");
-AddAction(3, af_none, "Set cost using object", "Pathfinding", "Use {0} to set cost to {1}", "Set cost using an object.", "SetCostUsingObject");
+AddComboParamOption("Replace");
+AddComboParamOption("Add");
+AddComboParam("Set method", "Whether to add or replace." , 0)
+AddAction(3, af_none, "Set cost using object", "Pathfinding", "{2} cost using {0} with {1}", "Set cost using an object.", "SetCostUsingObject");
 
 ////////////////////////////////////////
 // Expressions

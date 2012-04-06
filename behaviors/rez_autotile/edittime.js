@@ -1,15 +1,14 @@
 ﻿function GetBehaviorSettings()
 {
 	return {
-		"name":			"Pathfinder",			// as appears in 'add behavior' dialog, can be changed as long as "id" stays the same
-		"id":			"RezPathfinder",			// this is used to identify this behavior and is saved to the project; never change it
+		"name":			"Auto tile",			// as appears in 'add behavior' dialog, can be changed as long as "id" stays the same
+		"id":			"RezAutotile",			// this is used to identify this behavior and is saved to the project; never change it
 		"version":		"0.1",					// (float in x.y format) Behavior version - C2 shows compatibility warnings based on this
-		"description":	"This behaviour is connected to the Astar plugin to provide fast pathfinding.",
+		"description":	"Allows a object with animation to auto tile by setting the frame.",
 		"author":		"00Rez / Andrew Hall",
 		"help url":		"https://github.com/00Rez/c2",
 		"category":		"General",				// Prefer to re-use existing categories, but you can set anything here
-		"flags":		0						// uncomment lines to enable flags...
-						| bf_onlyone			// can only be added once to an object, e.g. solid
+		"flags":		bf_onlyone
 	};
 };
 
@@ -40,7 +39,7 @@
 //				script_name);		// corresponding runtime function name
 				
 // example				
-//AddCondition(0, cf_none, "Is moving", "My category", "{my} is moving", "Description for my condition!", "IsMoving");
+AddCondition(0, cf_none, "Check a tile has been checked", "Autotile", "Tile has been checked", "Whether a tile has been checked.", "TileChecked");
 
 ////////////////////////////////////////
 // Actions
@@ -53,14 +52,9 @@
 //			 description,		// appears in event wizard dialog when selected
 //			 script_name);		// corresponding runtime function name
 
-AddNumberParam("Start X", "Intitial X start position.", "0");
-AddNumberParam("Start Y", "Intitial X start position.", "0");
-AddNumberParam("Destination X", "Final X end position.", "0");
-AddNumberParam("Destination Y", "Final X end position.", "0");
-AddAction(0, af_none, "Find path", "Pathfinding", "Find path from ({0},{1}) to ({2},{3})", "Find a path.", "FindPath");
-
-AddObjectParam("Object", "This needs to be the Astar plugin");
-AddAction(1, af_none, "Setup pathfinding", "Pathfinding", "Setup pathfinding using {0}", "Setup pathfinding.", "Setup");
+// example
+AddAction(0, af_none, "Autotile", "Autotile", "Calculate tiling and set animation frame", "Calculate auto tile and then set the animation frame.", "Autotile");
+AddAction(1, af_none, "Update tile", "Autotile", "Update tile", "Use this to update a tile if placed in the same place or for any other reason.", "Update");
 
 ////////////////////////////////////////
 // Expressions
@@ -74,11 +68,7 @@ AddAction(1, af_none, "Setup pathfinding", "Pathfinding", "Setup pathfinding usi
 //				 description);	// description in expressions panel
 
 // example
-AddNumberParam("Position", "Position in path.", "0");
-AddExpression(0, ef_return_number, "PathX", "Pathfinding", "PathX", "This returns an X position based on a path position.");
-AddNumberParam("Position", "Position in path.", "0");
-AddExpression(1, ef_return_number, "PathY", "Pathfinding", "PathY", "This returns an Y position based on a path position.");
-AddExpression(2, ef_return_number, "Debug", "Debug", "Debug", "Debug value.");
+AddExpression(0, ef_return_number, "Animation frame", "Autotile", "AnimFrame", "Return the current.");
 
 ////////////////////////////////////////
 ACESDone();

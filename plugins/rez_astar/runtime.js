@@ -269,7 +269,7 @@ cr.plugins_.RezAstar = function(runtime)
 
 	*/
 	
-	function a_star(start, destination, board, columns, rows, extracost)
+	function a_star(start, destination, board, columns, rows, extracost, tp_list)
 	{
 		//Create start and destination as true nodes
 		start = new node(start[0], start[1], -1, -1, -1, -1);
@@ -282,6 +282,7 @@ cr.plugins_.RezAstar = function(runtime)
 		var g = 0; //Cost from start to current node
 		var h = heuristic(start, destination); //Cost from current node to destination
 		var f = g+h; //Cost from start to destination going through the current node
+		var directions = 4; // Test to use for 4 or 8 directions
 
 		//Push the start node onto the list of open nodes
 		//open.push(start); 
@@ -333,54 +334,59 @@ cr.plugins_.RezAstar = function(runtime)
 					if (board[new_node_x][new_node_y] == 0 //If the new node is open
 						|| (destination.x == new_node_x && destination.y == new_node_y)) //or the new node is our destination
 					{
-						//See if the node is already in our closed list. If so, skip it.
-						var found_in_closed = false;
-				
-					// optimization replaces the O(N) loop with O(1) bit check
-					if(0 != cbv.get(new_node_y * columns + new_node_x))
-						found_in_closed= true;
-					/*
-						for (var i in closed)
-							if (closed[i].x == new_node_x && closed[i].y == new_node_y)
-							{
-								found_in_closed = true;
-								break;
-							}
-					*/
-						if (found_in_closed)
-							continue;
-
-						//See if the node is in our open list. If not, use it.
-						var found_in_open = false;
-						// same optimization as for the closed list
-						if(0 != obv.get(new_node_y * columns + new_node_x))
-							found_in_open= true;
-					/*
-						for (var i in open)
-							if (open[i].x == new_node_x && open[i].y == new_node_y)
-							{
-								found_in_open = true;
-								break;
-							}
-					*/
-						if (!found_in_open)
-						{
-							var new_node = new node(new_node_x, new_node_y, closed.length-1, -1, -1, -1);
-
-							new_node.g = current_node.g + Math.floor(Math.sqrt(Math.pow(new_node.x-current_node.x, 2)+Math.pow(new_node.y-current_node.y, 2)));
-							new_node.h = heuristic(new_node, destination);
-							new_node.f = new_node.g + new_node.h + extracost[new_node_x][new_node_y];
-							// insert in order so index 0 is always the best
-							insertInOrder(open,new_node);
-								//open.push(new_node);
-							// set the bit after pushing element
-							obv.set(new_node_y * columns + new_node_x, true); 
-						}
+						findPath(new_node_x, new_node_y, columns, rows, current_node, obv, cbv, destination, open, closed, extracost);
 					}
 				}
 		}
 
 		return [];
+	}
+	
+	function findPath(x, y, col, row, cur, obv, cbv, dest, open, closed, extracost)
+	{
+		//See if the node is already in our closed list. If so, skip it.
+		var found_in_closed = false;
+				
+		// optimization replaces the O(N) loop with O(1) bit check
+		if(0 != cbv.get(y * col + x))
+			found_in_closed= true;
+		/*
+		for (var i in closed)
+		if (closed[i].x == new_node_x && closed[i].y == new_node_y)
+		{
+			found_in_closed = true;
+			break;
+		}
+		*/
+		if (found_in_closed)
+			return;
+
+		//See if the node is in our open list. If not, use it.
+		var found_in_open = false;
+		// same optimization as for the closed list
+		if(0 != obv.get(y * col + x))
+			found_in_open= true;
+		/*
+		for (var i in open)
+		if (open[i].x == new_node_x && open[i].y == new_node_y)
+		{
+			found_in_open = true;
+			break;
+		}
+		*/
+		if (!found_in_open)
+		{
+			var new_node = new node(x, y, closed.length-1, -1, -1, -1);
+
+			new_node.g = cur.g + Math.floor(Math.sqrt(Math.pow(new_node.x-cur.x, 2)+Math.pow(new_node.y-cur.y, 2)));
+			new_node.h = heuristic(new_node, dest);
+			new_node.f = new_node.g + new_node.h + extracost[x][y];
+			// insert in order so index 0 is always the best
+			insertInOrder(open,new_node);
+				//open.push(new_node);
+			// set the bit after pushing element
+			obv.set(y * col + x, true); 
+		}
 	}
 
 	//An A* heurisitic must be admissible, meaning it must never overestimate the distance to the goal.
@@ -477,7 +483,7 @@ cr.plugins_.RezAstar = function(runtime)
 	
 	var instanceProto = pluginProto.Instance.prototype;
 	
-	instanceProto.useObjects = function(obj, solid, cost)
+	instanceProto.useObjects = function(obj, solid, cost, method)
 	{
 		var sol, length, i, sx, sy, dx, dy, tx, ty;
 		
@@ -508,7 +514,12 @@ cr.plugins_.RezAstar = function(runtime)
 					{
 						// == This will add all the bbox.
 						this.map[tx][ty] = solid; // Solidify.
-						this.cost[tx][ty] = cost; // Reset cost to zero.
+						
+						if (method == 0) // replace
+							this.cost[tx][ty] = cost; // Reset cost to zero.
+						else //add
+							this.cost[tx][ty] += cost;
+						
 						this.changes.push([tx, ty]);
 						
 						/* == This will only add the outline of the bbox.
@@ -534,7 +545,7 @@ cr.plugins_.RezAstar = function(runtime)
 	
 	instanceProto.findPath = function(start, destination)
 	{
-		return a_star(start, destination, this.map, this.gw, this.gh, this.cost)
+		return a_star(start, destination, this.map, this.gw, this.gh, this.cost, this.tp_list)
 	};
 	
 	instanceProto.clearMap = function ()
@@ -604,9 +615,9 @@ cr.plugins_.RezAstar = function(runtime)
 		this.useObjects(obj, 0);
 	};
 	
-	acts.SetCostUsingObject = function (obj, cost)
+	acts.SetCostUsingObject = function (obj, cost, method)
 	{
-		this.useObjects(obj, 0, cost);
+		this.useObjects(obj, 0, cost, method);
 	};
 	
 	acts.ClearGrid = function ()
