@@ -550,20 +550,15 @@ cr.plugins_.RezAstar = function(runtime)
 	
 	instanceProto.clearMap = function ()
 	{
-		var change;
-	
-		// uses a list of changed cells for speed
-		if (this.changes != [])
+		for (var i = 0; i < this.gw; i++)
 		{
-			for (change in this.changes) // need to change this!
-			{
-				this.map[change[0]][change[1]] = 0;
+			for (var j = 0; j < this.gh; j++)
+			{			
+				this.map[i][j] = 0;
 			};
 		};
 		
 		this.changes = [];
-		
-		return true;
 	};
 
 	// called whenever an instance is created
@@ -620,7 +615,7 @@ cr.plugins_.RezAstar = function(runtime)
 		this.useObjects(obj, 0, cost, method);
 	};
 	
-	acts.ClearGrid = function ()
+	acts.ClearMap = function ()
 	{
 		this.clearMap();
 	};
