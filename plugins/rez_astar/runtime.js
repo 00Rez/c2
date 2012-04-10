@@ -483,6 +483,11 @@ cr.plugins_.RezAstar = function(runtime)
 	
 	var instanceProto = pluginProto.Instance.prototype;
 	
+	instanceProto.setMap = function(x, y, mapval) // Map coords used for this
+	{
+		this.map[cr.clamp(x, 0, this.gw - 1)][cr.clamp(y, 0, this.gw - 1)] = mapval;
+	};
+	
 	instanceProto.useObjects = function(obj, solid, cost, method)
 	{
 		var sol, length, i, sx, sy, dx, dy, tx, ty;
@@ -545,7 +550,14 @@ cr.plugins_.RezAstar = function(runtime)
 	
 	instanceProto.findPath = function(start, destination)
 	{
-		return a_star(start, destination, this.map, this.gw, this.gh, this.cost, this.tp_list)
+		if (this.map[destination[0]][destination[1]] != 1)
+		{
+			return a_star(start, destination, this.map, this.gw, this.gh, this.cost, this.tp_list);
+		}
+		else
+		{
+			return [];
+		};
 	};
 	
 	instanceProto.clearMap = function ()

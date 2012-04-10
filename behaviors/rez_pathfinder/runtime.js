@@ -68,6 +68,10 @@ cr.behaviors.RezPathfinder = function(runtime)
 		this.astarExists = false;
 		this.astar = null;
 		this.path = [];
+		this.blockSelf = true;
+		
+		this.px = this.inst.y;
+		this.py = this.inst.x;
 
 		if (cr.plugins_.RezAstar)
 		{
@@ -76,7 +80,7 @@ cr.behaviors.RezPathfinder = function(runtime)
 		
 		if (!this.astarExists) 
 		{
-			alert("Please add the Astar plugin to your project or if it already exists make sure it is named Astar.");
+			alert("Please add the Astar plugin to your project.");
 		};
 	};
 
@@ -84,6 +88,19 @@ cr.behaviors.RezPathfinder = function(runtime)
 	{
 		var dt = this.runtime.getDt(this.inst);
 		
+		if (this.blockSelf)
+		{
+			this.astar.setMap(Math.round(this.px / this.astar.ts), Math.round(this.py / this.astar.ts), 0); // Unblock previous position on map
+		
+			this.px = this.inst.x;
+			this.py = this.inst.y;
+		
+			this.astar.setMap(Math.round(this.px / this.astar.ts), Math.round(this.py / this.astar.ts), 1); // Block current position on map
+		
+			this.inst.set_bbox_changed();
+			this.inst.update_bbox();
+		};
+
 		// called every tick for you to update this.inst as necessary
 		// dt is the amount of time passed since the last tick, in case it's a movement
 	};
