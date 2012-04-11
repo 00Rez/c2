@@ -90,12 +90,12 @@ cr.behaviors.RezPathfinder = function(runtime)
 		
 		if (this.blockSelf)
 		{
-			this.astar.setMap(Math.round(this.px / this.astar.ts), Math.round(this.py / this.astar.ts), 0); // Unblock previous position on map
+			this.astar.setMap(this.px, this.py, 0); // Unblock previous position on map
 		
 			this.px = this.inst.x;
 			this.py = this.inst.y;
 		
-			this.astar.setMap(Math.round(this.px / this.astar.ts), Math.round(this.py / this.astar.ts), 1); // Block current position on map
+			this.astar.setMap(this.px, this.py, 1); // Block current position on map
 		
 			this.inst.set_bbox_changed();
 			this.inst.update_bbox();
@@ -188,12 +188,6 @@ cr.behaviors.RezPathfinder = function(runtime)
 		{
 			ret.set_int(this.inst.y);
 		};
-	};
-
-	// debug expression
-	exps.Debug = function (ret)
-	{
-		ret.set_int(this.debug);
 	};
 	
 }());

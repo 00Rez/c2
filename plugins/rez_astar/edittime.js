@@ -1,15 +1,15 @@
 ﻿function GetPluginSettings()
 {
 	return {
-		"name":			"Astar",				// as appears in 'insert object' dialog, can be changed as long as "id" stays the same
-		"id":			"RezAstar",				// this is used to identify this plugin and is saved to the project; never change it
-		"version":		"0.1",					// (float in x.y format) Plugin version - C2 shows compatibility warnings based on this
+		"name":			"Astar",				
+		"id":			"RezAstar",				
+		"version":		"0.18",					
 		"description":	"This plugin is connected with the behaviour Pathfinder to allow fast pathfinding.",
 		"author":		"00Rez / Andrew Hall",
 		"help url":		"https://github.com/00Rez/c2",
-		"category":		"General",				// Prefer to re-use existing categories, but you can set anything here
-		"type":			"object",				// either "world" (appears in layout and is drawn), else "object"
-		"flags":		0						// uncomment lines to enable flags...
+		"category":		"General",				
+		"type":			"object",				
+		"flags":		0						
 	};
 };
 
@@ -17,22 +17,15 @@
 // Actions
 AddObjectParam("Object", "Object to use for blocking.");
 AddAction(0, af_none, "Block path using object", "Pathfinding", "Use {0} to block paths", "Block path using an object.", "BlockPathUsingObject");
-
 AddAction(1, af_none, "Clear map of all blockers", "Pathfinding", "Clear map of all blockers", "Clear the map of all blockers.", "ClearMap");
-
 AddObjectParam("Object", "Object to use for unblocking.");
 AddAction(2, af_none, "Unblock path using object", "Pathfinding", "Use {0} to unblock paths", "Unblock path using an object.", "UnblockPathUsingObject");
-
 AddObjectParam("Object", "Object to use for cost.");
 AddNumberParam("Cost", "This will affect pathfinding.", "0");
 AddComboParamOption("Replace");
 AddComboParamOption("Add");
-AddComboParam("Set method", "Whether to add or replace." , 0)
+AddComboParam("Set method", "Whether to add or replace." , 0);
 AddAction(3, af_none, "Set cost using object", "Pathfinding", "{2} cost using {0} with {1}", "Set cost using an object.", "SetCostUsingObject");
-
-////////////////////////////////////////
-// Expressions
-AddExpression(0, ef_return_any, "Debug value", "Debug", "Debug", "Debug value.");
 
 ////////////////////////////////////////
 ACESDone();

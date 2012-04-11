@@ -485,6 +485,9 @@ cr.plugins_.RezAstar = function(runtime)
 	
 	instanceProto.setMap = function(x, y, mapval) // Map coords used for this
 	{
+		x = Math.round( x / this.ts);
+		y = Math.round( y / this.ts);
+		
 		this.map[cr.clamp(x, 0, this.gw - 1)][cr.clamp(y, 0, this.gw - 1)] = mapval;
 	};
 	
@@ -515,7 +518,7 @@ cr.plugins_.RezAstar = function(runtime)
 				{
 					sol[i].update_bbox();
 					sol[i].set_bbox_changed();
-					if (sol[i].bbox.contains_pt(tx * this.ts, ty * this.ts))
+					if (sol[i].bquad.contains_pt(tx * this.ts, ty * this.ts))
 					{
 						// == This will add all the bbox.
 						this.map[tx][ty] = solid; // Solidify.
@@ -568,6 +571,16 @@ cr.plugins_.RezAstar = function(runtime)
 			{			
 				this.map[i][j] = 0;
 			};
+		};
+		
+		this.changes = [];
+	};
+	
+	instanceProto.clearChanges = function ()
+	{
+		for (var i = 0; i < this.changes.length; i++)
+		{
+			this.map[this.changes[i][0]][this.changes[i][1]] = 0;
 		};
 		
 		this.changes = [];
@@ -629,17 +642,13 @@ cr.plugins_.RezAstar = function(runtime)
 	
 	acts.ClearMap = function ()
 	{
-		this.clearMap();
+		//this.clearMap();
+		this.clearChanges();
 	};
 	
 	//////////////////////////////////////
 	// Expressions
 	pluginProto.exps = {};
 	var exps = pluginProto.exps;
-	
-	exps.Debug = function (ret)
-	{
-		ret.set_int(this.debug);
-	};
 
 }());
