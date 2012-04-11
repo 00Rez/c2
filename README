@@ -2,9 +2,6 @@ This repo holds all my plugins/behaviors for Construct 2.
 
 http://www.scirra.com/
 
-Latest Astar plugin version 0.19
+Latest Astar plugin version 0.20
 
-- [add] added heuristic weighting using objects (object avoidance)
-- [add] added dummy values for the find path action for when I implement more 
-        heuristics and no diagonals
-- [fix] uses object quad instead of rect when calculating blocking using objects
+- [add] can now set heuristic and diagonals
