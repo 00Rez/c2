@@ -483,7 +483,7 @@ cr.plugins_.RezAstar = function(runtime)
 	
 	var instanceProto = pluginProto.Instance.prototype;
 	
-	instanceProto.setMap = function(x, y, mapval) // Map coords used for this
+	instanceProto.setMap = function(x, y, mapval) // Pass pixel coords to this as it auto snaps.
 	{
 		x = Math.round( x / this.ts);
 		y = Math.round( y / this.ts);
