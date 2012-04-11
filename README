@@ -2,6 +2,8 @@ This repo holds all my plugins/behaviors for Construct 2.
 
 http://www.scirra.com/
 
-Latest Astar plugin version 0.20
+Latest Astar plugin / Pathfinder behavior version 0.20
 
 - [add] can now set heuristic and diagonals
+
+- [bug] realtime overlap
