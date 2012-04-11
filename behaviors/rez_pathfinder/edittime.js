@@ -19,13 +19,13 @@ AddNumberParam("Start X", "Intitial X start position.", "0");
 AddNumberParam("Start Y", "Intitial X start position.", "0");
 AddNumberParam("Destination X", "Final X end position.", "0");
 AddNumberParam("Destination Y", "Final X end position.", "0");
-AddComboParamOption("yes");
-AddComboParamOption("no");
+AddComboParamOption("diagonals");
+AddComboParamOption("no diagonals");
 AddComboParam("Diagonals", "Whether to use diagonals or not." , 0);
-AddComboParamOption("normal");
-AddComboParamOption("...");
+AddComboParamOption("euclidean");
+AddComboParamOption("manhattan");
 AddComboParam("Heuristic", "Heuristic used for path finding." , 0);
-AddAction(0, af_none, "Find path", "Pathfinding", "Find path from ({0},{1}) to ({2},{3})", "Find a path.", "FindPath");
+AddAction(0, af_none, "Find path", "Pathfinding", "Find a <b>path</b> from <i>({0},{1})</i> to <i>({2},{3})</i> using <b>{4}</b>", "Find a path.", "FindPath");
 AddObjectParam("Object", "This needs to be the Astar plugin");
 AddAction(1, af_none, "Setup pathfinding", "Pathfinding", "Setup pathfinding using {0}", "Setup pathfinding.", "Setup");
 

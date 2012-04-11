@@ -269,7 +269,7 @@ cr.plugins_.RezAstar = function(runtime)
 
 	*/
 	
-	function a_star(start, destination, board, columns, rows, extracost, tp_list)
+	function a_star(start, destination, board, columns, rows, extracost, tp_list, directions, h)
 	{
 		//Create start and destination as true nodes
 		start = new node(start[0], start[1], -1, -1, -1, -1);
@@ -280,9 +280,10 @@ cr.plugins_.RezAstar = function(runtime)
 		var obv = new BitArray();
 		var cbv = new BitArray();
 		var g = 0; //Cost from start to current node
-		var h = heuristic(start, destination); //Cost from current node to destination
+		var h = heuristic(start, destination, h); //Cost from current node to destination
 		var f = g+h; //Cost from start to destination going through the current node
-		var directions = 4; // Test to use for 4 or 8 directions
+		
+		//if (directions != 4 || directions != 8) {directions = 8};
 
 		//Push the start node onto the list of open nodes
 		//open.push(start); 
@@ -327,22 +328,53 @@ cr.plugins_.RezAstar = function(runtime)
 			closed.push(current_node);
 			// set it's bit O(1)
 			cbv.set(current_node.y * columns + current_node.x, true); 
-			//Expand our current node (look in all 8 directions)
-			for (var new_node_x = Math.max(0, current_node.x-1); new_node_x <= Math.min(columns-1, current_node.x+1); new_node_x++)
-				for (var new_node_y = Math.max(0, current_node.y-1); new_node_y <= Math.min(rows-1, current_node.y+1); new_node_y++)
+			//Expand our current node:
+			if (directions == 4)
+			{
+				var cx1 = Math.max(0, current_node.x - 1);
+				var cy1 = Math.max(0, current_node.y - 1);
+				var cx2 = Math.max(0, current_node.x + 1);
+				var cy2 = Math.max(0, current_node.y + 1);
+			
+				if (board[cx1][current_node.y] == 0 //If the new node is open
+					|| (destination.x == cx1 && destination.y == current_node.y)) //or the new node is our destination
 				{
-					if (board[new_node_x][new_node_y] == 0 //If the new node is open
-						|| (destination.x == new_node_x && destination.y == new_node_y)) //or the new node is our destination
-					{
-						findPath(new_node_x, new_node_y, columns, rows, current_node, obv, cbv, destination, open, closed, extracost);
-					}
+					findPath(cx1, current_node.y, columns, rows, current_node, obv, cbv, destination, open, closed, extracost, h);
 				}
+				if (board[cx2][current_node.y] == 0 //If the new node is open
+					|| (destination.x == cx2 && destination.y == current_node.y)) //or the new node is our destination
+				{
+					findPath(cx2, current_node.y, columns, rows, current_node, obv, cbv, destination, open, closed, extracost, h);
+				}
+				if (board[current_node.x][cy1] == 0 //If the new node is open
+					|| (destination.x == current_node.x && destination.y == current_node.y - 1)) //or the new node is our destination
+				{
+					findPath(current_node.x, cy1, columns, rows, current_node, obv, cbv, destination, open, closed, extracost, h);
+				}
+				if (board[current_node.x][cy2] == 0 //If the new node is open
+					|| (destination.x == current_node.x && destination.y == current_node.y + 1)) //or the new node is our destination
+				{
+					findPath(current_node.x, cy2, columns, rows, current_node, obv, cbv, destination, open, closed, extracost, h);
+				}
+			}
+			else
+			{
+				for (var new_node_x = Math.max(0, current_node.x-1); new_node_x <= Math.min(columns-1, current_node.x+1); new_node_x++)
+					for (var new_node_y = Math.max(0, current_node.y-1); new_node_y <= Math.min(rows-1, current_node.y+1); new_node_y++)
+					{
+						if (board[new_node_x][new_node_y] == 0 //If the new node is open
+							|| (destination.x == new_node_x && destination.y == new_node_y)) //or the new node is our destination
+						{
+							findPath(new_node_x, new_node_y, columns, rows, current_node, obv, cbv, destination, open, closed, extracost, h);
+						}
+					}
+			};
 		}
 
 		return [];
 	}
 	
-	function findPath(x, y, col, row, cur, obv, cbv, dest, open, closed, extracost)
+	function findPath(x, y, col, row, cur, obv, cbv, dest, open, closed, extracost, h)
 	{
 		//See if the node is already in our closed list. If so, skip it.
 		var found_in_closed = false;
@@ -378,8 +410,8 @@ cr.plugins_.RezAstar = function(runtime)
 		{
 			var new_node = new node(x, y, closed.length-1, -1, -1, -1);
 
-			new_node.g = cur.g + Math.floor(Math.sqrt(Math.pow(new_node.x-cur.x, 2)+Math.pow(new_node.y-cur.y, 2)));
-			new_node.h = heuristic(new_node, dest);
+			new_node.g = cur.g + diagCost(new_node.x-cur.x, new_node.y-cur.y);
+			new_node.h = heuristic(new_node, dest, h);
 			new_node.f = new_node.g + new_node.h + extracost[x][y];
 			// insert in order so index 0 is always the best
 			insertInOrder(open,new_node);
@@ -388,16 +420,28 @@ cr.plugins_.RezAstar = function(runtime)
 			obv.set(y * col + x, true); 
 		}
 	}
+	
+	function diagCost(x, y)
+	{
+		return Math.floor(Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)));
+	};
 
 	//An A* heurisitic must be admissible, meaning it must never overestimate the distance to the goal.
 	//In other words, it must either underestimate or return exactly the distance to the goal.
-	function heuristic(current_node, destination)
+	function heuristic(current_node, destination, h)
 	{
-		//Find the straight-line distance between the current node and the destination. (Thanks to id for the improvement)
-		//return Math.floor(Math.sqrt(Math.pow(current_node.x-destination.x, 2)+Math.pow(current_node.y-destination.y, 2)));
-		var x = current_node.x - destination.x;
-		var y = current_node.y - destination.y;
-		return Math.sqrt(x*x+y*y);
+		var x = Math.abs(current_node.x - destination.x);
+		var y = Math.abs(current_node.y - destination.y);
+		
+		switch (h)
+		{
+			case 0: // euclidean
+				return Math.sqrt(x*x + y*y);
+			case 1: // manhattan
+				return Math.max(x, y);
+			default: // default euclidean
+				return Math.sqrt(x*x + y*y);
+		};
 	}
 
 
@@ -483,7 +527,7 @@ cr.plugins_.RezAstar = function(runtime)
 	
 	var instanceProto = pluginProto.Instance.prototype;
 	
-	instanceProto.setMap = function(x, y, mapval) // Pass pixel coords to this as it auto snaps.
+	instanceProto.setMap = function(x, y, mapval)
 	{
 		x = Math.round( x / this.ts);
 		y = Math.round( y / this.ts);
@@ -551,11 +595,11 @@ cr.plugins_.RezAstar = function(runtime)
 		};
 	};
 	
-	instanceProto.findPath = function(start, destination)
+	instanceProto.findPath = function(start, destination, directions, h)
 	{
-		if (this.map[destination[0]][destination[1]] != 1)
+		if (this.map[cr.clamp(destination[0], 0, this.gw-1)][cr.clamp(destination[1], 0, this.gw-1)] != 1)
 		{
-			return a_star(start, destination, this.map, this.gw, this.gh, this.cost, this.tp_list);
+			return a_star(start, destination, this.map, this.gw, this.gh, this.cost, this.tp_list, directions, h);
 		}
 		else
 		{

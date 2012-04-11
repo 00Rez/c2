@@ -42,11 +42,11 @@ cr.behaviors.RezPathfinder = function(runtime)
 	
 	var behinstProto = behaviorProto.Instance.prototype;
 	
-	behinstProto.findPath = function(start, destination)
+	behinstProto.findPath = function(start, destination, h)
 	{
 		if (this.index != -1 && this.astarExists)
 		{
-			return this.astar.findPath(start, destination);
+			return this.astar.findPath(start, destination, this.directions, h);
 		}
 		else
 		{
@@ -69,6 +69,7 @@ cr.behaviors.RezPathfinder = function(runtime)
 		this.astar = null;
 		this.path = [];
 		this.blockSelf = true;
+		this.directions = 8;
 		
 		this.px = this.inst.y;
 		this.py = this.inst.x;
@@ -125,12 +126,17 @@ cr.behaviors.RezPathfinder = function(runtime)
             alert ("Pathfinder should connect to an Astar plugin");
 	}; 
 	
-	acts.FindPath = function (sx, sy, dx, dy)
+	acts.FindPath = function (sx, sy, dx, dy, diag, h)
 	{
 		var ts;
 		
 		if (this.astarExists)
 		{
+			if (diag == 0)
+				this.directions = 8;
+			else
+				this.directions = 4;
+			
 			ts = this.astar.ts;
 		
 			sx = Math.round(sx / ts);
@@ -139,7 +145,7 @@ cr.behaviors.RezPathfinder = function(runtime)
 			dx = Math.round(dx / ts);
 			dy = Math.round(dy / ts);
 		
-			this.path = this.findPath([sx, sy], [dx, dy]);
+			this.path = this.findPath([sx, sy], [dx, dy], h);
 			
 			this.debug = this.path.length;
 		}
