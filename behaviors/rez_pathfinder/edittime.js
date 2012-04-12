@@ -3,7 +3,7 @@
 	return {
 		"name":			"Pathfinder",			
 		"id":			"RezPathfinder",			
-		"version":		"0.20",					
+		"version":		"0.21",					
 		"description":	"This behaviour is connected to the Astar plugin to provide fast pathfinding.",
 		"author":		"00Rez / Andrew Hall",
 		"help url":		"https://github.com/00Rez/c2",
@@ -35,7 +35,7 @@ AddNumberParam("Position", "Position in path.", "0");
 AddExpression(0, ef_return_number, "PathX", "Pathfinding", "PathX", "This returns an X position based on a path position.");
 AddNumberParam("Position", "Position in path.", "0");
 AddExpression(1, ef_return_number, "PathY", "Pathfinding", "PathY", "This returns an Y position based on a path position.");
-AddExpression(2, ef_return_number, "Debug", "Debug", "Debug", "Debug value.");
+AddExpression(2, ef_return_number, "PathLength", "Pathfinding", "PathLength", "Returns the current path length zero if none.");
 
 ////////////////////////////////////////
 ACESDone();

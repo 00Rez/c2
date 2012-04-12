@@ -196,4 +196,8 @@ cr.behaviors.RezPathfinder = function(runtime)
 		};
 	};
 	
+	exps.PathLength = function (ret)
+	{
+		if (this.path) {ret.set_int(this.path.length - 1)} else {ret.set_int(0)};
+	};	
 }());
