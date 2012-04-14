@@ -333,8 +333,8 @@ cr.plugins_.RezAstar = function(runtime)
 			{
 				var cx1 = Math.max(0, current_node.x - 1);
 				var cy1 = Math.max(0, current_node.y - 1);
-				var cx2 = Math.max(0, current_node.x + 1);
-				var cy2 = Math.max(0, current_node.y + 1);
+				var cx2 = Math.min(columns-1, current_node.x + 1);
+				var cy2 = Math.min(rows-1, current_node.y + 1);
 			
 				if (board[cx1][current_node.y] == 0 //If the new node is open
 					|| (destination.x == cx1 && destination.y == current_node.y)) //or the new node is our destination
@@ -561,8 +561,8 @@ cr.plugins_.RezAstar = function(runtime)
 				for (ty = sy; ty <= dy; ty++)
 				{
 					sol[i].update_bbox();
-					sol[i].set_bbox_changed();
-					if (sol[i].bquad.contains_pt(tx * this.ts, ty * this.ts))
+					//sol[i].set_bbox_changed();
+					if (sol[i].bbox.contains_pt(tx * this.ts, ty * this.ts))
 					{
 						// == This will add all the bbox.
 						this.map[tx][ty] = solid; // Solidify.
@@ -688,6 +688,13 @@ cr.plugins_.RezAstar = function(runtime)
 	{
 		//this.clearMap();
 		this.clearChanges();
+	};
+	
+	acts.SetUsingPosition = function (x, y, set)
+	{
+		this.setMap(x, y, set);
+		
+		if (set == 1) {this.changes.push([Math.round(x / this.ts), Math.round(y / this.ts)])};
 	};
 	
 	//////////////////////////////////////

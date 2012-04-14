@@ -28,6 +28,9 @@ AddComboParam("Heuristic", "Heuristic used for path finding." , 0);
 AddAction(0, af_none, "Find path", "Pathfinding", "Find a <b>path</b> from <i>({0},{1})</i> to <i>({2},{3})</i> using <b>{4}</b>", "Find a path.", "FindPath");
 AddObjectParam("Object", "This needs to be the Astar plugin");
 AddAction(1, af_none, "Setup pathfinding", "Pathfinding", "Setup pathfinding using {0}", "Setup pathfinding.", "Setup");
+AddAction(2, af_none, "Clear path", "Pathfinding", "Clear path", "Clear current path.", "ClearPath");
+AddNumberParam("Position", "Position in path to start from.", "0");
+AddAction(3, af_none, "Recalculate path", "Pathfinding", "Recalculate path", "Recalculate path using the provided and last position in the path list.", "RecalculatePath");
 
 ////////////////////////////////////////
 // Expressions

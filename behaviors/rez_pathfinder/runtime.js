@@ -89,7 +89,7 @@ cr.behaviors.RezPathfinder = function(runtime)
 	{
 		var dt = this.runtime.getDt(this.inst);
 		
-		if (this.blockSelf)
+		if (this.blockSelf && this.astar)
 		{
 			this.astar.setMap(this.px, this.py, 0); // Unblock previous position on map
 		
@@ -152,6 +152,22 @@ cr.behaviors.RezPathfinder = function(runtime)
 		else
 		{
 			this.path = [];
+		};
+	};
+	
+	acts.ClearPath = function () // Simple utility action.
+	{
+		this.path = [];
+	};
+	
+	acts.RecalculatePath = function (pos) // Test action that re-calculates the path using first and last positions.
+	{
+		cr.clamp(pos, 0, this.path.length - 1);
+	
+		if (this.path != [])
+		{
+			var l = this.path.length - 1;
+			this.path = this.findPath(this.path[pos], this.path[l]);
 		};
 	};
 

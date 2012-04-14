@@ -26,6 +26,12 @@ AddComboParamOption("Replace");
 AddComboParamOption("Add");
 AddComboParam("Set method", "Whether to add or replace." , 0);
 AddAction(3, af_none, "Set cost using object", "Pathfinding", "{2} cost using {0} with {1}", "Set cost using an object.", "SetCostUsingObject");
+AddNumberParam("X", "X position.", "0");
+AddNumberParam("Y", "Y position.", "0");
+AddComboParamOption("Unblock");
+AddComboParamOption("Block");
+AddComboParam("Set method", "Whether to block or unblock." , 0);
+AddAction(4, af_none, "Unblock/block using position", "Pathfinding", "{2} <b>path</b> at <i>({0}, {1})</i>", "Unblock/block using a position.", "SetUsingPosition");
 
 ////////////////////////////////////////
 ACESDone();
