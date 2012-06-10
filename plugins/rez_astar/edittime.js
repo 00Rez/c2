@@ -3,7 +3,7 @@
 	return {
 		"name":			"Astar",				
 		"id":			"RezAstar",				
-		"version":		"0.20",					
+		"version":		"0.23",					
 		"description":	"This plugin is connected with the behaviour Pathfinder to allow fast pathfinding.",
 		"author":		"00Rez / Andrew Hall",
 		"help url":		"https://github.com/00Rez/c2",
