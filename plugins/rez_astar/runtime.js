@@ -607,17 +607,18 @@ cr.plugins_.RezAstar = function(runtime)
 		};
 	};
 	
-	instanceProto.clearMap = function ()
+	instanceProto.clearMap = function (val)
 	{
+		this.changes = [];
+		
 		for (var i = 0; i < this.gw; i++)
 		{
 			for (var j = 0; j < this.gh; j++)
 			{			
-				this.map[i][j] = 0;
+				this.map[i][j] = val;
+				if (val == 1) {this.changes.push([i, j]);};
 			};
 		};
-		
-		this.changes = [];
 	};
 	
 	instanceProto.clearChanges = function ()
@@ -686,8 +687,13 @@ cr.plugins_.RezAstar = function(runtime)
 	
 	acts.ClearMap = function ()
 	{
-		//this.clearMap();
+		//this.clearMap(0);
 		this.clearChanges();
+	};
+	
+	acts.BlockAll = function ()
+	{
+		this.clearMap(1);
 	};
 	
 	acts.SetUsingPosition = function (x, y, set)

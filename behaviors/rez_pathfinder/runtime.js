@@ -52,8 +52,6 @@ cr.behaviors.RezPathfinder = function(runtime)
 		{
 			return [];
 		};
-		
-		alert(this.path.length);
 	};
 
 	behinstProto.onCreate = function()
@@ -70,6 +68,7 @@ cr.behaviors.RezPathfinder = function(runtime)
 		this.path = [];
 		this.blockSelf = true;
 		this.directions = 8;
+		this.h = 0;
 		
 		this.px = this.inst.y;
 		this.py = this.inst.x;
@@ -130,6 +129,8 @@ cr.behaviors.RezPathfinder = function(runtime)
 	{
 		var ts;
 		
+		this.h = h;
+		
 		if (this.astarExists)
 		{
 			if (diag == 0)
@@ -146,8 +147,6 @@ cr.behaviors.RezPathfinder = function(runtime)
 			dy = Math.round(dy / ts);
 		
 			this.path = this.findPath([sx, sy], [dx, dy], h);
-			
-			this.debug = this.path.length;
 		}
 		else
 		{
@@ -162,12 +161,22 @@ cr.behaviors.RezPathfinder = function(runtime)
 	
 	acts.RecalculatePath = function (pos) // Test action that re-calculates the path using first and last positions.
 	{
-		cr.clamp(pos, 0, this.path.length - 1);
+		var x1, x2, y1, y2, ts;
+	
+		pos = cr.clamp(pos, 0, this.path.length - 1);
 	
 		if (this.path != [])
 		{
 			var l = this.path.length - 1;
-			this.path = this.findPath(this.path[pos], this.path[l]);
+			
+			ts = this.astar.ts;
+			
+			x1 = Math.round(this.path[pos].x / ts);
+			y1 = Math.round(this.path[pos].y / ts);
+			x2 = Math.round(this.path[l].x / ts);
+			y2 = Math.round(this.path[l].y / ts);
+			
+			this.path = this.findPath([x1, y1], [x2, y2], this.h);
 		};
 	};
 

@@ -32,6 +32,7 @@ AddComboParamOption("Unblock");
 AddComboParamOption("Block");
 AddComboParam("Set method", "Whether to block or unblock." , 0);
 AddAction(4, af_none, "Unblock/block using position", "Pathfinding", "{2} <b>path</b> at <i>({0}, {1})</i>", "Unblock/block using a position.", "SetUsingPosition");
+AddAction(5, af_none, "Block all of the map", "Pathfinding", "Set all of the map to blockers", "Set all of the map to blockers.", "BlockAll");
 
 ////////////////////////////////////////
 ACESDone();
