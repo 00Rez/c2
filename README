@@ -2,7 +2,13 @@ This repo holds all my plugins/behaviors for Construct 2.
 
 http://www.scirra.com/
 
-Latest Astar plugin / Pathfinder behavior combined version 0.23
+Latest Astar plugin / Pathfinder behavior combined version 0.24
+
+- [add] GetBlockAt and GetCostAt expressions
+
+- [fix] Block using object fixed, now correctly sets blocker cells
+
+Astar plugin / Pathfinder behavior combined version 0.23
 
 - [add] Block all map action
 
